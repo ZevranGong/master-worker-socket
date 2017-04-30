@@ -42,9 +42,15 @@ class Result_manager(object):
         self.control_sender.bind("tcp://127.0.0.1:5559")
 
     def recvResult(self):
+        collecter_data = {}
         for task_nbr in range(10000):
             result_message = self.results_receiver.recv_json()
-            print "Worker %i answered: %i" % (result_message['worker'], result_message['result'])
+            if collecter_data.has_key(result_message['worker_id']):
+                collecter_data[result_message['worker_id']] = collecter_data[result_message['worker_id']] + 1
+            else:
+                collecter_data[result_message['worker_id']] = 1
+            print "Thread %i from worker %i answered: %i" % (result_message['worker'], result_message['worker_id'], result_message['result'])
+        print collecter_data
 
         # Signal to all workers that we are finsihed
         self.control_sender.send("FINISHED")
